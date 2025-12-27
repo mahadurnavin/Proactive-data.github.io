@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Sheet Viewer</title>
+
+  <!-- Google Login -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+
+<h2>Google Sheet Data Viewer</h2>
+
+<!-- Login Button -->
+<div id="login"></div>
+
+<!-- Content -->
+<div id="content" style="display:none;">
+  <table id="dataTable"></table>
+</div>
+
+<script>
+  // 🔑 ใส่ค่าของคุณตรงนี้
+  const CLIENT_ID = "363914165830-ajrckmejfjusamf7n33o1jpltdej225c.apps.googleusercontent.com";
+  const SHEET_ID  = "https://docs.google.com/spreadsheets/d/1xK8KW9tmMSC3AajIc0TAxyge7q07fP5c/edit?usp=sharing&ouid=102012492444613356814&rtpof=true&sd=true";
+  const API_KEY   = "AIzaSyDREDAIOlLDBLiSuZxJRfSqPdkWZS5bdn8";
+
+  window.onload = () => {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: onLogin
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById("login"),
+      { theme: "outline", size: "large" }
+    );
+  };
+
+  function onLogin(response) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("content").style.display = "block";
+    loadSheet();
+  }
+
+  function loadSheet() {
+    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1?key=${API_KEY}`)
+      .then(res => res.json())
+      .then(data => renderTable(data.values));
+  }
+
+  function renderTable(rows) {
+    const table = document.getElementById("dataTable");
+    table.innerHTML = "";
+
+    rows.forEach((row, i) => {
+      const tr = document.createElement("tr");
+      row.forEach(cell => {
+        const el = document.createElement(i === 0 ? "th" : "td");
+        el.innerText = cell;
+        tr.appendChild(el);
+      });
+      table.appendChild(tr);
+    });
+  }
+</script>
+
+</body>
+</html>
